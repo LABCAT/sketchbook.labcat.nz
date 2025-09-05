@@ -169,6 +169,7 @@ const sketch = (p) => {
 
   p.createShapeSelector = (currentShape) => {
     const container = document.createElement('div');
+    container.className = 'shape-selector';
     Object.assign(container.style, {
       position: 'absolute', top: '10px', left: '10px', zIndex: '1000',
       display: 'flex', alignItems: 'center', gap: '5px'
@@ -176,7 +177,7 @@ const sketch = (p) => {
     
     const label = document.createElement('div');
     label.textContent = 'SELECT SHAPE';
-    label.style.cssText = 'font-size: 14px; margin-bottom: 2px;';
+    label.style.cssText = 'color: white; font-size: 10px; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); background-color: rgba(0,0,0,0.7); padding: 5px; border-radius: 3px;';
     container.appendChild(label);
     
     const shapeNames = ['Circle', 'Triangle', 'Square', 'Pentagon', 'Hexagon', 'Heptagon', 'Octagon'];
@@ -190,7 +191,7 @@ const sketch = (p) => {
       
       const button = document.createElement('div');
       Object.assign(button.style, {
-        width: '30px', height: '30px', cursor: 'pointer',
+        width: '28px', height: '28px', cursor: 'pointer',
         display: 'flex', alignItems: 'center', justifyContent: 'center'
       });
       
@@ -229,7 +230,11 @@ const sketch = (p) => {
       
       button.appendChild(svg);
       
-      const handleClick = () => {
+      const handleClick = (event) => {
+        if (event) {
+          event.stopPropagation();
+          event.preventDefault();
+        }
         document.querySelectorAll('input[name="shape"]').forEach(r => {
           r.checked = false;
           const nextSibling = r.nextElementSibling;
@@ -284,32 +289,6 @@ const sketch = (p) => {
     button.style.fontSize = '16px';
     button.style.borderRadius = '5px';
     
-    button.onclick = () => {
-      p.baseHue = p.random(360);
-      p.complementaryHue = (p.baseHue + 180) % 360;
-      p.currentShapeType = p.random(p.shapeTypes.filter(shape => shape !== p.currentShapeType));
-      p.currentPattern = p.random(p.patternFunctions.filter(pattern => pattern !== p.currentPattern));
-      
-      p.updatePatternDisplay();
-      
-      const allRadios = document.querySelectorAll('input[name="shape"]');
-      allRadios.forEach(r => {
-        r.checked = false;
-        const shapeButton = r.parentElement.querySelector('div');
-        if (shapeButton) {
-          shapeButton.style.backgroundColor = 'transparent';
-        }
-      });
-      
-      const selectedRadio = document.querySelector(`input[value="${p.currentShapeType}"]`);
-      if (selectedRadio) {
-        selectedRadio.checked = true;
-        const shapeButton = selectedRadio.parentElement.querySelector('div');
-        if (shapeButton) {
-          shapeButton.style.backgroundColor = 'white';
-        }
-      }
-    };
 
     container.appendChild(patternText);
     container.appendChild(button);
@@ -335,6 +314,41 @@ const sketch = (p) => {
   p.setStrokeWeight = () => {
     const weight = p.min(p.width, p.height) * 0.01;
     p.strokeWeight(weight);
+  };
+
+  /**
+   * Handles mouse press events
+   */
+  p.mousePressed = () => {
+    const elements = document.elementsFromPoint(p.mouseX + p.canvas.offsetLeft, p.mouseY + p.canvas.offsetTop);
+    const isOverShapeSelector = elements.some(el => el.closest('.shape-selector'));
+    
+    if (isOverShapeSelector) return;
+    
+    p.baseHue = p.random(360);
+    p.complementaryHue = (p.baseHue + 180) % 360;
+    p.currentShapeType = p.random(p.shapeTypes.filter(shape => shape !== p.currentShapeType));
+    p.currentPattern = p.random(p.patternFunctions.filter(pattern => pattern !== p.currentPattern));
+    
+    p.updatePatternDisplay();
+    
+    const allRadios = document.querySelectorAll('input[name="shape"]');
+    allRadios.forEach(r => {
+      r.checked = false;
+      const shapeButton = r.nextElementSibling;
+      if (shapeButton) {
+        shapeButton.style.backgroundColor = 'transparent';
+      }
+    });
+    
+    const selectedRadio = document.querySelector(`input[value="${p.currentShapeType}"]`);
+    if (selectedRadio) {
+      selectedRadio.checked = true;
+      const shapeButton = selectedRadio.nextElementSibling;
+      if (shapeButton) {
+        shapeButton.style.backgroundColor = 'white';
+      }
+    }
   };
 
   /**
