@@ -167,112 +167,84 @@ const sketch = (p) => {
     }
   };
 
-  /**
-   * Creates the shape selection radio buttons
-   * @param {string} currentShape - The currently selected shape type
-   */
   p.createShapeSelector = (currentShape) => {
     const container = document.createElement('div');
-    container.style.position = 'absolute';
-    container.style.top = '10px';
-    container.style.left = '10px';
-    container.style.zIndex = '1000';
-    container.style.display = 'flex';
-    container.style.alignItems = 'center';
-    container.style.gap = '5px';
+    Object.assign(container.style, {
+      position: 'absolute', top: '10px', left: '10px', zIndex: '1000',
+      display: 'flex', alignItems: 'center', gap: '5px'
+    });
     
     const label = document.createElement('div');
     label.textContent = 'SELECT SHAPE';
-    label.style.fontSize = '14px';
-    label.style.marginBottom = '2px';
+    label.style.cssText = 'font-size: 14px; margin-bottom: 2px;';
     container.appendChild(label);
     
     const shapeNames = ['Circle', 'Triangle', 'Square', 'Pentagon', 'Hexagon', 'Heptagon', 'Octagon'];
     
     shapeNames.forEach((shapeName, index) => {
-      const radioContainer = document.createElement('div');
-      radioContainer.style.display = 'inline-block';
-      radioContainer.style.cursor = 'pointer';
-      
       const radio = document.createElement('input');
       radio.type = 'radio';
       radio.name = 'shape';
       radio.value = p.shapeTypes[index];
-      radio.id = `shape-${index}`;
       radio.style.display = 'none';
       
-      const shapeButton = document.createElement('canvas');
-      shapeButton.width = 30;
-      shapeButton.height = 30;
-      shapeButton.style.cursor = 'pointer';
-      
-      const tempP5 = new p5((p) => {
-        p.setup = () => {
-          p.createCanvas(30, 30);
-          p.noFill();
-          p.stroke(0, 0, 0);
-          p.strokeWeight(2);
-          p.translate(15, 15);
-          if (shapeName === 'Circle') {
-            p.ellipse(0, 0, 20, 20);
-          } else if (shapeName === 'Triangle') {
-            p.translate(0, 3);
-            p.equilateral(0, 0, 26);
-            p.translate(0, -3);
-          } else if (shapeName === 'Square') {
-            p.rect(-10, -10, 20, 20);
-          } else if (shapeName === 'Pentagon') {
-            p.pentagon(0, 0, 20);
-          } else if (shapeName === 'Hexagon') {
-            p.hexagon(0, 0, 20);
-          } else if (shapeName === 'Heptagon') {
-            p.polygon(0, 0, 10, 7, -p.PI/2);
-          } else if (shapeName === 'Octagon') {
-            p.octagon(0, 0, 20);
-          }
-        }
+      const button = document.createElement('div');
+      Object.assign(button.style, {
+        width: '30px', height: '30px', cursor: 'pointer',
+        display: 'flex', alignItems: 'center', justifyContent: 'center'
       });
       
-      const tempCanvas = tempP5.canvas;
-      shapeButton.getContext('2d').drawImage(tempCanvas, 0, 0);
-      tempP5.remove();
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('viewBox', '0 0 20 20');
+      svg.style.cssText = 'width: 20px; height: 20px; stroke: black; stroke-width: 2; fill: none;';
       
-      radio.addEventListener('change', (e) => {
-        e.stopPropagation();
-        if (radio.checked) {
-          p.currentShapeType = radio.value;
-          shapeButton.style.backgroundColor = 'white';
-        } else {
-          shapeButton.style.backgroundColor = 'transparent';
-        }
-      });
-      
-      radioContainer.addEventListener('click', (e) => {
-        e.stopPropagation();
+      // Create shape
+      if (shapeName === 'Circle') {
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', '10'); circle.setAttribute('cy', '10'); circle.setAttribute('r', '8');
+        svg.appendChild(circle);
+      } else if (shapeName === 'Triangle') {
+        const triangle = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+        triangle.setAttribute('points', '10,2 18,16 2,16');
+        svg.appendChild(triangle);
+      } else if (shapeName === 'Square') {
+        const square = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        square.setAttribute('x', '2'); square.setAttribute('y', '2'); 
+        square.setAttribute('width', '16'); square.setAttribute('height', '16');
+        svg.appendChild(square);
+      } else {
+        const sides = { Pentagon: 5, Hexagon: 6, Heptagon: 7, Octagon: 8 }[shapeName];
+        const rotationOffset = shapeName === 'Hexagon' ? Math.PI / 6 : 
+                              shapeName === 'Octagon' ? Math.PI / 8 : 0;
         
-        const allRadios = document.querySelectorAll('input[name="shape"]');
-        allRadios.forEach(r => {
-          r.checked = false;
-          r.dispatchEvent(new Event('change'));
-        });
-        
-        radio.checked = true;
-        radio.dispatchEvent(new Event('change'));
-      });
-      
-      if (radio.value === currentShape) {
-        radio.checked = true;
-        p.currentShapeType = radio.value;
-        shapeButton.style.backgroundColor = 'white';
+        const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+        const points = [];
+        for (let i = 0; i < sides; i++) {
+          const angle = (i * 2 * Math.PI / sides) - Math.PI / 2 + rotationOffset;
+          points.push(`${10 + 8 * Math.cos(angle)},${10 + 8 * Math.sin(angle)}`);
+        }
+        polygon.setAttribute('points', points.join(' '));
+        svg.appendChild(polygon);
       }
-  
-      radioContainer.appendChild(radio);
-      radioContainer.appendChild(shapeButton);
-      container.appendChild(radioContainer);
-    });
-    
-    container.addEventListener('click', (e) => {
-      e.stopPropagation();
+      
+      button.appendChild(svg);
+      
+      const handleClick = () => {
+        document.querySelectorAll('input[name="shape"]').forEach(r => {
+          r.checked = false;
+          const nextSibling = r.nextElementSibling;
+          if (nextSibling) nextSibling.style.backgroundColor = 'transparent';
+        });
+        radio.checked = true;
+        button.style.backgroundColor = 'white';
+        p.currentShapeType = radio.value;
+      };
+      
+      button.addEventListener('click', handleClick);
+      if (radio.value === currentShape) handleClick();
+      
+      container.appendChild(radio);
+      container.appendChild(button);
     });
     
     document.body.appendChild(container);
@@ -323,18 +295,18 @@ const sketch = (p) => {
       const allRadios = document.querySelectorAll('input[name="shape"]');
       allRadios.forEach(r => {
         r.checked = false;
-        const canvas = r.parentElement.querySelector('canvas');
-        if (canvas) {
-          canvas.style.backgroundColor = 'transparent';
+        const shapeButton = r.parentElement.querySelector('div');
+        if (shapeButton) {
+          shapeButton.style.backgroundColor = 'transparent';
         }
       });
       
       const selectedRadio = document.querySelector(`input[value="${p.currentShapeType}"]`);
       if (selectedRadio) {
         selectedRadio.checked = true;
-        const canvas = selectedRadio.parentElement.querySelector('canvas');
-        if (canvas) {
-          canvas.style.backgroundColor = 'white';
+        const shapeButton = selectedRadio.parentElement.querySelector('div');
+        if (shapeButton) {
+          shapeButton.style.backgroundColor = 'white';
         }
       }
     };
