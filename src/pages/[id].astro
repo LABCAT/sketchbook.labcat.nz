@@ -1,0 +1,24 @@
+---
+import SketchLayout from '@layouts/SketchLayout.astro';
+import { sketchMetadata } from '@sketches/sketchMetadata.js';
+
+export async function getStaticPaths() {
+  return Object.keys(sketchMetadata).map(id => ({
+    params: { id },
+    props: { sketchInfo: sketchMetadata[id] },
+  }));
+}
+
+const { id } = Astro.params;
+const { sketchInfo } = Astro.props;
+---
+
+<SketchLayout title={sketchInfo.title} description={sketchInfo.description} />
+
+<script define:vars={{ sketchPath: sketchInfo.sketch }}>
+  import(`/src/sketches/${sketchPath}`)
+    .then(module => {})
+    .catch(err => {
+      console.error('Failed to load sketch:', err);
+    });
+</script>
