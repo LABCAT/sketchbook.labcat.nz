@@ -15,10 +15,35 @@ const { sketchInfo } = Astro.props;
 
 <SketchLayout title={sketchInfo.title} description={sketchInfo.description} />
 
-<script define:vars={{ sketchPath: sketchInfo.sketch }}>
-  import(`/src/sketches/${sketchPath}`)
-    .then(module => {})
-    .catch(err => {
-      console.error('Failed to load sketch:', err);
-    });
+<script>
+  // Static mapping for production builds
+  const sketchModules = {
+    'colour-theory/sketch-1.js': () =>
+      import('/src/sketches/colour-theory/sketch-1.js'),
+  };
+
+  // Get the sketch path from the page URL
+  const pathSegments = window.location.pathname.split('/');
+  const sketchId =
+    pathSegments[pathSegments.length - 1] ||
+    pathSegments[pathSegments.length - 2];
+
+  // Map sketch IDs to paths (keep in sync with metadata)
+  const idToPath = {
+    'complementary-colours': 'colour-theory/sketch-1.js',
+  };
+
+  const sketchPath = idToPath[sketchId];
+
+  if (sketchPath && sketchModules[sketchPath]) {
+    sketchModules[sketchPath]()
+      .then(module => {
+        console.log('Sketch loaded successfully!', module);
+      })
+      .catch(err => {
+        console.error('Failed to load sketch:', err);
+      });
+  } else {
+    console.error('Sketch not found:', sketchId, sketchPath);
+  }
 </script>
