@@ -20,6 +20,7 @@ const { sketchInfo } = Astro.props;
   const sketches = {
     'complementary-colours': () =>
       import('/src/sketches/colour-theory/sketch-1.js'),
+    'blend-mode': () => import('/src/sketches/colour-theory/sketch-2.js'),
   };
 
   // Get the sketch ID from the page URL

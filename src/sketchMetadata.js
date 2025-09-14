@@ -4,6 +4,11 @@ export const sketchMetadata = {
     description: 'A sketch to explore complementary colours.',
     sketch: 'colour-theory/sketch-1.js',
   },
+  'blend-mode': {
+    title: 'Blending Colours',
+    description: 'A sketch to explore the p5js blendMode function.',
+    sketch: 'colour-theory/sketch-2.js',
+  },
 };
 
 export function getAllSketches() {
