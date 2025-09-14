@@ -106,13 +106,25 @@ const sketch = (p) => {
     
     const cellWidth = p.width / 2;
     const cellHeight = p.height / 2;
+    const cellAspectRatio = cellWidth / cellHeight;
     const baseColor = p.color(p.baseHue, 100, 100);
     const complementaryColor = p.color(p.complementaryHue, 100, 100);
     
-    p.drawCell(baseColor, p.complementaryHue, 0, 0, cellWidth, cellHeight);
-    p.drawCell(p.altColor, p.baseHue, cellWidth, 0, cellWidth, cellHeight);
-    p.drawCell(p.altColor, p.complementaryHue, 0, cellHeight, cellWidth, cellHeight);
-    p.drawCell(complementaryColor, p.baseHue, cellWidth, cellHeight, cellWidth, cellHeight);
+    if (cellAspectRatio > 1.5 && window.innerHeight < 500) {
+      // Single row layout when aspect ratio > 3:2
+      const singleCellWidth = p.width / 4;
+      const singleCellHeight = p.height;
+      p.drawCell(baseColor, p.complementaryHue, 0, 0, singleCellWidth, singleCellHeight);
+      p.drawCell(p.altColor, p.complementaryHue, singleCellWidth, 0, singleCellWidth, singleCellHeight);
+      p.drawCell(complementaryColor, p.baseHue, singleCellWidth * 2, 0, singleCellWidth, singleCellHeight);
+      p.drawCell(p.altColor, p.baseHue, singleCellWidth * 3, 0, singleCellWidth, singleCellHeight);
+    } else {
+      // 2x2 grid layout
+      p.drawCell(baseColor, p.complementaryHue, 0, 0, cellWidth, cellHeight);
+      p.drawCell(p.altColor, p.baseHue, cellWidth, 0, cellWidth, cellHeight);
+      p.drawCell(p.altColor, p.complementaryHue, 0, cellHeight, cellWidth, cellHeight);
+      p.drawCell(complementaryColor, p.baseHue, cellWidth, cellHeight, cellWidth, cellHeight);
+    }
   };
 
   /**
