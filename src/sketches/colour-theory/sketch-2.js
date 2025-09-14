@@ -47,7 +47,9 @@ const sketch = (p) => {
     'drawVesicaPiscis',
     'drawSeedOfLife',
     'drawEggOfLife',
-    'drawFlowerOfLife'
+    'drawFlowerOfLife',
+    'drawFruitOfLife',
+    'drawMetatronsCube'
   ];
 
   /**
@@ -64,7 +66,7 @@ const sketch = (p) => {
      p.currentPattern = p.random(p.patternFunctions.filter(pattern => pattern !== p.currentPattern));
      createShapeSelector(p, p.currentShapeType);
      createRegenerateButton(p);
-     p.createBlendModeSelector('MULTIPLY');
+     p.createBlendModeSelector('ADD');
   };
 
    /**
@@ -75,13 +77,13 @@ const sketch = (p) => {
      
      const cellWidth = p.width / 2;
      const cellHeight = p.height / 2;
-     const blackColor = p.color(0, 0, 0);
-     const baseColor = p.color(p.baseHue, 100, 100);
+    const baseColor = p.color(p.baseHue, 100, 100);
      const complementaryColor = p.color(p.complementaryHue, 100, 100);
+     const altColor = p.getAltColor(p.currentBlendMode);
      
      p.drawCell(baseColor, p.complementaryHue, 0, 0, cellWidth, cellHeight);
-     p.drawCell(blackColor, p.baseHue, cellWidth, 0, cellWidth, cellHeight);
-     p.drawCell(blackColor, p.complementaryHue, 0, cellHeight, cellWidth, cellHeight);
+     p.drawCell(altColor, p.baseHue, cellWidth, 0, cellWidth, cellHeight);
+     p.drawCell(altColor, p.complementaryHue, 0, cellHeight, cellWidth, cellHeight);
      p.drawCell(complementaryColor, p.baseHue, cellWidth, cellHeight, cellWidth, cellHeight);
    };
 
@@ -103,8 +105,8 @@ const sketch = (p) => {
     p.rect(0, 0, w, h);
     p.noFill();
     p.setCenter(w / 2, h / 2);
-    p.fill(0, 0, 100, 100);
-    // p.fill(strokeHue, 100, 100, 20);
+    // p.fill(0, 0, 100, 100);
+    p.fill(strokeHue, 100, 100, 20);
     p.stroke(strokeHue, 100, 100);
     p[p.currentPattern](p.currentShapeType, size);
     p.pop();
@@ -131,7 +133,7 @@ const sketch = (p) => {
     select.style.cssText = 'padding: 5px; border-radius: 3px; border: none; background-color: white; color: black; font-size: 12px; cursor: pointer;';
     
     const blendModes = [
-      'BLEND', 'ADD', 'DARKEST', 'LIGHTEST', 'EXCLUSION', 
+      'ADD', 'DARKEST', 'LIGHTEST', 'EXCLUSION', 
       'MULTIPLY', 'SCREEN', 'REPLACE', 'REMOVE', 'DIFFERENCE', 
       'OVERLAY', 'HARD_LIGHT', 'SOFT_LIGHT', 'DODGE', 'BURN'
     ];
@@ -167,6 +169,17 @@ const sketch = (p) => {
     // Set initial blend mode
     p.currentBlendMode = currentBlendMode;
     p.blendMode(p[currentBlendMode]);
+  };
+
+  /**
+   * Determines alternate color based on blend mode
+   * @param {string} blendMode - Current blend mode
+   * @returns {p5.Color} Color object (black or white)
+   */
+  p.getAltColor = (blendMode) => {
+    if (blendMode === 'DARKEST') return p.color(0, 0, 100);
+    if (blendMode === 'LIGHTEST') return p.color(0, 0, 0);
+    return Math.random() < 0.5 ? p.color(0, 0, 0) : p.color(0, 0, 100);
   };
 
   // Set up event handlers using shared functions
