@@ -7,9 +7,7 @@ import {
   createRegenerateButton,
   updatePatternDisplay,
   setStrokeWeight,
-  mousePressed,
   windowResized,
-  isPortraitCanvas
 } from './shared.js';
 
 const sketch = (p) => {
@@ -53,39 +51,69 @@ const sketch = (p) => {
   ];
 
   /**
+   * Available blend modes for the sketch
+   * @type {string[]}
+   */
+  p.blendModes = [
+    'ADD',
+    'DARKEST',
+    'LIGHTEST',
+    'EXCLUSION',
+    'MULTIPLY',
+    'SCREEN',
+    'DIFFERENCE',
+    'HARD_LIGHT'
+  ];
+
+  /**
    * Initializes the canvas and sets up the sketch
    */
   p.setup = () => {
     p.createCanvas(window.innerWidth, window.innerHeight);
     p.colorMode(p.HSB, 360, 100, 100, 100);
-    // p.noFill();
     setStrokeWeight(p);
-    p.baseHue = p.random(360);
-    p.complementaryHue = (p.baseHue + 180) % 360;
-    p.currentShapeType = p.random(p.shapeTypes.filter(shape => shape !== p.currentShapeType));
-     p.currentPattern = p.random(p.patternFunctions.filter(pattern => pattern !== p.currentPattern));
-     createShapeSelector(p, p.currentShapeType);
-     createRegenerateButton(p);
-     p.createBlendModeSelector('ADD');
+    
+    p.currentBlendMode = p.random(p.blendModes);
+    p.initializeRandomValues();
+    p.initializeUI();
   };
 
-   /**
+  /**
+   * Initializes random values for the sketch
+   */
+  p.initializeRandomValues = () => {
+    p.baseHue = p.random(360);
+    p.complementaryHue = (p.baseHue + 180) % 360;
+    p.currentShapeType = p.random(p.shapeTypes);
+    p.currentPattern = p.random(p.patternFunctions);
+    p.altColor = p.setAltColor(p.currentBlendMode);
+  };
+
+  /**
+   * Initializes UI components
+   */
+  p.initializeUI = () => {
+    createShapeSelector(p, p.currentShapeType);
+    createRegenerateButton(p);
+    p.createBlendModeSelector(p.currentBlendMode);
+  };
+
+  /**
    * Main drawing function that renders the sketch
    */
-    p.draw = () => {
-     p.clear();
-     
-     const cellWidth = p.width / 2;
-     const cellHeight = p.height / 2;
+  p.draw = () => {
+    p.clear();
+    
+    const cellWidth = p.width / 2;
+    const cellHeight = p.height / 2;
     const baseColor = p.color(p.baseHue, 100, 100);
-     const complementaryColor = p.color(p.complementaryHue, 100, 100);
-     const altColor = p.getAltColor(p.currentBlendMode);
-     
-     p.drawCell(baseColor, p.complementaryHue, 0, 0, cellWidth, cellHeight);
-     p.drawCell(altColor, p.baseHue, cellWidth, 0, cellWidth, cellHeight);
-     p.drawCell(altColor, p.complementaryHue, 0, cellHeight, cellWidth, cellHeight);
-     p.drawCell(complementaryColor, p.baseHue, cellWidth, cellHeight, cellWidth, cellHeight);
-   };
+    const complementaryColor = p.color(p.complementaryHue, 100, 100);
+    
+    p.drawCell(baseColor, p.complementaryHue, 0, 0, cellWidth, cellHeight);
+    p.drawCell(p.altColor, p.baseHue, cellWidth, 0, cellWidth, cellHeight);
+    p.drawCell(p.altColor, p.complementaryHue, 0, cellHeight, cellWidth, cellHeight);
+    p.drawCell(complementaryColor, p.baseHue, cellWidth, cellHeight, cellWidth, cellHeight);
+  };
 
   /**
    * Draws a single cell with background color and sacred geometry pattern
@@ -105,8 +133,11 @@ const sketch = (p) => {
     p.rect(0, 0, w, h);
     p.noFill();
     p.setCenter(w / 2, h / 2);
-    // p.fill(0, 0, 100, 100);
-    p.fill(strokeHue, 100, 100, 20);
+    if (['EXCLUSION', 'DIFFERENCE'].includes(p.currentBlendMode)) {
+      p.fill(0, 0, 100, 100);
+    } else {
+      p.fill(strokeHue, 100, 100, 20);
+    }
     p.stroke(strokeHue, 100, 100);
     p[p.currentPattern](p.currentShapeType, size);
     p.pop();
@@ -121,7 +152,7 @@ const sketch = (p) => {
     container.className = 'blend-mode-selector';
     Object.assign(container.style, {
       position: 'absolute', top: '10px', right: '10px', zIndex: '1000',
-      display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '5px'
+      alignItems: 'center', gap: '5px'
     });
     
     const label = document.createElement('div');
@@ -132,11 +163,7 @@ const sketch = (p) => {
     const select = document.createElement('select');
     select.style.cssText = 'padding: 5px; border-radius: 3px; border: none; background-color: white; color: black; font-size: 12px; cursor: pointer;';
     
-    const blendModes = [
-      'ADD', 'DARKEST', 'LIGHTEST', 'EXCLUSION', 
-      'MULTIPLY', 'SCREEN', 'REPLACE', 'REMOVE', 'DIFFERENCE', 
-      'OVERLAY', 'HARD_LIGHT', 'SOFT_LIGHT', 'DODGE', 'BURN'
-    ];
+    const blendModes = p.blendModes;
     
     blendModes.forEach(mode => {
       const option = document.createElement('option');
@@ -147,22 +174,23 @@ const sketch = (p) => {
       }
       select.appendChild(option);
     });
+      
+     select.addEventListener('change', (event) => {
+       event.stopPropagation();
+       const selectedMode = event.target.value;
+       p.currentBlendMode = selectedMode;
+       p.blendMode(p[selectedMode]);
+       p.altColor = p.setAltColor(selectedMode);
+     });
     
-  select.addEventListener('change', (event) => {
-    event.stopPropagation();
-    const selectedMode = event.target.value;
-    p.currentBlendMode = selectedMode;
-    p.blendMode(p[selectedMode]);
-  });
-  
-  select.addEventListener('click', (event) => {
-    event.stopPropagation();
-  });
-  
-  select.addEventListener('mousedown', (event) => {
-    event.stopPropagation();
-  });
+    select.addEventListener('click', (event) => {
+      event.stopPropagation();
+    });
     
+    select.addEventListener('mousedown', (event) => {
+      event.stopPropagation();
+    });
+      
     container.appendChild(select);
     document.body.appendChild(container);
     
@@ -176,14 +204,51 @@ const sketch = (p) => {
    * @param {string} blendMode - Current blend mode
    * @returns {p5.Color} Color object (black or white)
    */
-  p.getAltColor = (blendMode) => {
-    if (blendMode === 'DARKEST') return p.color(0, 0, 100);
-    if (blendMode === 'LIGHTEST') return p.color(0, 0, 0);
+  p.setAltColor = (blendMode) => {
+    console.log(blendMode);
+    
+    if (['DARKEST', 'MULTIPLY', 'DIFFERENCE', ].includes(blendMode)) return p.color(0, 0, 100);
+    if (['ADD', 'LIGHTEST', 'EXCLUSION', 'SCREEN'].includes(blendMode)) return p.color(0, 0, 0);
     return Math.random() < 0.5 ? p.color(0, 0, 0) : p.color(0, 0, 100);
   };
 
+  /**
+   * Customized mouse press handler for sketch-2
+   * Handles blend mode selector and regenerates the sketch
+   */
+  p.mousePressed = () => {
+    const elements = document.elementsFromPoint(p.mouseX + p.canvas.offsetLeft, p.mouseY + p.canvas.offsetTop);
+    const isOverShapeSelector = elements.some(el => el.closest('.shape-selector'));
+    const isOverBlendModeSelector = elements.some(el => el.closest('.blend-mode-selector'));
+    
+    if (isOverShapeSelector || isOverBlendModeSelector) return;
+    
+    p.initializeRandomValues();
+    
+    updatePatternDisplay(p);
+    
+    // Update shape selector UI
+    const allRadios = document.querySelectorAll('input[name="shape"]');
+    allRadios.forEach(r => {
+      r.checked = false;
+      const shapeButton = r.nextElementSibling;
+      if (shapeButton) {
+        shapeButton.style.backgroundColor = 'transparent';
+      }
+    });
+    
+    const selectedRadio = document.querySelector(`input[value="${p.currentShapeType}"]`);
+    if (selectedRadio) {
+      selectedRadio.checked = true;
+      const shapeButton = selectedRadio.nextElementSibling;
+      if (shapeButton) {
+        shapeButton.style.backgroundColor = 'white';
+      }
+    }
+    
+  };
+
   // Set up event handlers using shared functions
-  p.mousePressed = () => mousePressed(p);
   p.windowResized = () => windowResized(p);
 };
 

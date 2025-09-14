@@ -24,7 +24,10 @@
         d="m129.92 28.251c-2.89 0-5.729 1.17-7.77 3.22-2.051 2.04-3.23 4.88-3.23 7.78 0 2.891 1.18 5.73 3.23 7.78 2.04 2.04 4.88 3.22 7.77 3.22 2.9 0 5.73-1.18 7.78-3.22 2.05-2.05 3.22-4.89 3.22-7.78 0-2.9-1.17-5.74-3.22-7.78-2.04-2.05-4.88-3.22-7.78-3.22z"
       ></path>
     </svg>
-    <span class="instagram-cta__text">Follow @labcat2020</span>
+    <span class="instagram-cta__text">
+      <span class="instagram-cta__action">Follow</span>
+      @labcat2020
+    </span>
   </a>
 </div>
 
@@ -32,8 +35,8 @@
   .instagram-cta {
     --shadow-colour: var(--cyan);
     position: fixed;
-    bottom: 20px;
-    left: 20px;
+    bottom: 10px;
+    left: 10px;
     z-index: 1000;
     background: var(--black);
     border-radius: 8px;
@@ -61,16 +64,34 @@
     }
 
     &__icon {
-      width: 24px;
-      height: 24px;
+      --size: 22px;
+      width: var(--size);
+      height: var(--size);
       border-radius: 8px;
       fill: currentColor;
       transition: all 0.5s;
+
+      @include media-breakpoint-up(md) {
+        --size: 24px;
+      }
     }
 
     &__text {
-      font-size: 18px;
+      --size: 16px;
+      font-size: var(--size);
       -webkit-text-stroke: 1px var(--black);
+
+      @include media-breakpoint-up(md) {
+        --size: 18px;
+      }
+    }
+
+    &__action {
+      display: none;
+
+      @include media-breakpoint-up(md) {
+        display: inline;
+      }
     }
   }
 </style>

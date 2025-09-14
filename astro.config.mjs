@@ -34,7 +34,7 @@ export default defineConfig({
     css: {
       preprocessorOptions: {
         scss: {
-          additionalData: `@import "normalize.css";`
+          additionalData: `@import "@styles/mixins/breakpoints.scss";`
         }
       }
     }
