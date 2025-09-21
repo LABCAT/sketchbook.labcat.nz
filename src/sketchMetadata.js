@@ -9,6 +9,11 @@ export const sketchMetadata = {
     description: 'A sketch to explore the p5js blendMode function.',
     sketch: 'colour-theory/sketch-2.js',
   },
+  'monochromatic': {
+    title: 'Monochromatic Colours',
+    description: 'A sketch to explore the monochromatic colour scheme.',
+    sketch: 'colour-theory/sketch-3.js',
+  },
 };
 
 export function getAllSketches() {

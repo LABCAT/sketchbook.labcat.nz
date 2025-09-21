@@ -28,6 +28,21 @@ This sketch serves as an exploration of p5.js's blendMode capabilities, demonstr
 
 - [p5.js blendMode Reference](https://p5js.org/reference/p5/blendMode/)
 
+## Sketch 3 - Monochromatic Tints and Shades
+
+Exploring monochromatic color schemes through tints and shades. This iteration removes blend modes to focus on how adding white (tints) or black (shades) affects visual harmony.
+
+### Key Differences from Sketch 2
+
+- **Animation**: Patterns grow from zero to full size
+- **Auto-regeneration**: Refreshes every 2 seconds  
+- **Unique patterns per cell**: Each quadrant shows a different sacred geometry pattern
+- **Monochromatic focus**: Simplified color palette using tints and shades
+
+### Technical Exploration
+
+The Tree of Life pattern required manual coordinate calculation rather than p5.Polar, though p5.Polar was useful for determining the sephirot positions.
+
 ## Exploration & Inspiration
 
 - [CodePen: Complementary Colors Challenge](https://codepen.io/tag/cpc-complementary-colors/)
@@ -36,5 +51,6 @@ This sketch serves as an exploration of p5.js's blendMode capabilities, demonstr
 - [RYB Color Model](https://en.wikipedia.org/wiki/RYB_color_model)
 - [Color Wheel](https://en.wikipedia.org/wiki/Color_wheel)
 - [Sacred Geometry](https://pardesco.com/blogs/news/sacred-geometry-art-symbols-meanings)
+- [Sacred Geometry](https://rareearthgallerycc.com/blogs/about-crystals-minerals/introduction-to-sacred-geometry)
 - [p5.Polar Library](https://github.com/liz-peng/p5.Polar)
 - [p5.js colorMode](https://p5js.org/reference/p5/colorMode/)

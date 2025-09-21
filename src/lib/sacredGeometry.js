@@ -134,3 +134,63 @@ p5.prototype.drawMetatronsCube = function(currentShapeType, size) {
   }
   this.strokeWeight(originalStrokeWeight);
 };
+
+/**
+ * Draws the tree of life pattern
+ * @param {string} currentShapeType - Current shape type being used
+ * @param {number} size - Size of the pattern
+ */
+p5.prototype.drawTreeOfLife = function(currentShapeType, size) {
+  const shapeSize = size / 2;
+  const points = [];
+  
+  for (let i = 0; i < 6; i++) {
+    const angle = (i * 60 + 30) * Math.PI / 180;
+    const x = Math.cos(angle) * shapeSize;
+    const y = Math.sin(angle) * shapeSize - shapeSize;
+    points.push({x, y});
+  }
+  
+  for (let i = 0; i < 6; i++) {
+    if (i === 0 || i === 2) continue; 
+    const angle = (i * 60 + 30) * Math.PI / 180;
+    const x = Math.cos(angle) * shapeSize;
+    const y = Math.sin(angle) * shapeSize + shapeSize;
+    points.push({x, y});
+  }
+  
+  points.push({x: 0, y: shapeSize});
+
+  points.forEach((point, index) => {
+    this.push();
+    this.translate(point.x, point.y);
+    if (currentShapeType === 'polarEllipse') {
+      this.polarEllipse(0, shapeSize / 3, shapeSize / 3);
+    } else {
+      this[currentShapeType](0, shapeSize / 3);
+    }
+    this.pop();
+  });
+
+  const connections = [
+    // Top triangle (Supernal Triad)
+    [3, 4], [4, 5], [5, 3],
+    // Vertical paths from top triangle
+    [5, 0], [3, 2],
+    // Connections to bottom ring
+    [0, 9], [2, 7],
+    // Horizontal connections
+    [0, 2],
+    // Vertical central trunk
+    [4, 8], [8, 10], [10, 6],
+    // Bottom formation connections
+    [7, 8], [8, 9], [9, 10], [10, 7]
+  ];
+  
+  connections.forEach(([from, to]) => {
+    if (points[from] && points[to]) {
+      this.line(points[from].x, points[from].y, points[to].x, points[to].y);
+    }
+  });
+  
+};
